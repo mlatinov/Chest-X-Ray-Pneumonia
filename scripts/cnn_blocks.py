@@ -22,7 +22,7 @@ class modern_block(tf.keras.layers.Layer) :
     """
     Modern CNN Block Conv2D → BatchNormalization → Activation -> MaxPooling2D
     """
-    def __ini__(self, filters, kernel_size, activation, pool_size) :
+    def __init__(self, filters, kernel_size, activation, pool_size) :
         super().__init__()
 
         # Define the Network Block
@@ -52,6 +52,9 @@ class residual_block(tf.keras.layers.Layer) :
         self.conv2d_2     = tf.keras.layers.Conv2D(filters = filters, kernel_size = kernel_size, padding = "same")
         self.bn_2         = tf.keras.layers.BatchNormalization() 
 
+        # Projection shortcut — only used when channels need to match
+        self.projection = tf.keras.layers.Conv2D(filters=filters, kernel_size=1, padding='same')
+
     def call(self, x, training = False) :
         # Branch in the begginng
         branch = x 
@@ -63,9 +66,13 @@ class residual_block(tf.keras.layers.Layer) :
         x = self.conv2d_2(x)
         x = self.bn_2(x, training = training)
 
+        # If channels dont match project the branch
+        if branch.shape[-1] != x.shape[-1]:
+            branch = self.projection(branch)
+
         # Merge the brach 
         x = x + branch
-        x = tf.keras.layers.Activation(x)
+        x = self.activation(x)
         return x 
 
 class inception_block(tf.keras.layers.Layer) :
