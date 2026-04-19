@@ -1,52 +1,56 @@
 import mlflow
 import tensorflow as tf 
-from scripts.cnn_ResNet_style import Resnet
+from scripts.cnn_unet_inception import Unet_inception
 from scripts.process_image import process_data 
 from scripts.plot_history import plot_history
-def exp_resnet() :
 
-    # Autolog Keras Model Paramters 
+def exp_Unet_Inception() : 
+
+    ## Automatic Log the model 
     mlflow.keras.autolog()
+    
+    with mlflow.start_run(run_name = "Unet_Inception") :
 
-    with mlflow.start_run(run_name = "ResNet"):
         # Process the data 
         model_data = process_data(
             dir_test_path       = "sample_data_img/test/",
             dir_train_path      = "sample_data_img/train/",
             dir_validation_path = "sample_data_img/val/",
-            img_size            = (244, 244) 
+            img_size            = (224, 224)
         )
-        # Get the moedl 
-        resnet = Resnet(activation = "relu")
+
+        # Get the model 
+        unet_inception = Unet_inception(activation = "relu")
 
         # Compile the model 
-        resnet.compile(
-            optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001),
+        unet_inception.compile(
             loss      = tf.keras.losses.BinaryCrossentropy(),
+            optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001),
             metrics   = [
                 tf.keras.metrics.AUC(),
-                tf.keras.metrics.Precision(),
-                tf.keras.metrics.Recall()
+                tf.keras.metrics.Recall(),
+                tf.keras.metrics.Precision()
             ]
         )
-        # Train the model 
-        history = resnet.fit(
-            x                = model_data["train_samples"],
-            validation_data  = model_data["val_samples"],
-            epochs = 20,
-            callbacks        = [
+
+        # Fit the model 
+        history = unet_inception.fit(
+            x               = model_data["train_samples"],
+            validation_data = model_data["val_samples"],
+            epochs          = 20,
+            callbacks       = [
                 tf.keras.callbacks.EarlyStopping(
                     monitor              = "val_loss",
                     patience             = 3,
                     restore_best_weights = True,
-                    verbose              = 1
+                    verbose              = 1 
                 ),
                 tf.keras.callbacks.ReduceLROnPlateau(
-                    monitor  = "val_loss",
-                    factor   = 0.5,
-                    patience = 3,
-                    min_lr   = 1e-6,
-                    verbose  = 1
+                    monitor   = "val_loss",
+                    factor    = 0.5,
+                    patience  = 3,
+                    min_lr    = 1e-6,
+                    verbose   = 1
                 )
             ]
         )
@@ -55,7 +59,7 @@ def exp_resnet() :
         mlflow.log_figure(fig, "training_curves.png")
 
         # Prediction on the test set 
-        model_eval = resnet.evaluate(x = model_data["test_data"],return_dict = True) 
+        model_eval = unet_inception.evaluate(x = model_data["test_data"],return_dict = True) 
 
         # Log the model evaluation on the test set 
         mlflow.log_metrics(model_eval)

@@ -12,16 +12,16 @@ def plot_history(history) :
     axes[0].legend() 
 
     # Auc 
-    axes[1].plot(history.history["auc_1"],     label = "Traning AUC")
-    axes[1].plot(history.history["val_auc_1"], label = "Validation AUC")
+    axes[1].plot(history.history["auc"],     label = "Traning AUC")
+    axes[1].plot(history.history["val_auc"], label = "Validation AUC")
     axes[1].set_title("AUC")
     axes[1].legend()
 
     # Precision / Recall 
-    axes[2].plot(history.history["precision_1"],     label = "Traning Precision")
-    axes[2].plot(history.history["val_precision_1"], label = "Validaiton Precision")
-    axes[2].plot(history.history["recall_1"],        label = "Training Recall")
-    axes[2].plot(history.history["val_recall_1"],    label = "Validation Racall")
+    axes[2].plot(history.history["precision"],     label = "Traning Precision")
+    axes[2].plot(history.history["val_precision"], label = "Validaiton Precision")
+    axes[2].plot(history.history["recall"],        label = "Training Recall")
+    axes[2].plot(history.history["val_recall"],    label = "Validation Racall")
     axes[2].set_title("Precision / Recall")
     axes[2].legend()
 
