@@ -14,6 +14,7 @@ def exp_baseline_cnn() :
 
         # Process data 
         model_data = process_data(
+            dir_test_path       = "sample_data_img/test/",
             dir_train_path      = "sample_data_img/train/",
             dir_validation_path = "sample_data_img/val/",
             img_size            = (224, 224)
@@ -55,3 +56,9 @@ def exp_baseline_cnn() :
         # Ploting and logging the metrics 
         fig = plot_history(history)
         mlflow.log_figure(fig, "training_curves.png")
+
+        # Prediction on the test set 
+        model_eval = baseline_model.evaluate(x = model_data["test_data"],return_dict = True) 
+
+        # Log the model evaluation on the test set 
+        mlflow.log_metrics(model_eval)
